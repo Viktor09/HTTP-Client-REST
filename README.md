@@ -1,37 +1,49 @@
-O sa incep prin a explica fiecare fisier
+1. **Buffer:**  
 
-In buffer se afla codul din laborator pt formatarea stringurilor atunci cand trimit requesturile
+   Contains code from the lab for string formatting when sending requests.
 
-In connection e tot codul din laborator pt a putea face legatura cu serverul si a putea comunica cu el.
+2. **Connection:**  
 
-In parson se afla biblioteca pt json in C, atunci cand trebuie sa trimit niste fielduri in requesturi.
+   Contains code from the lab for establishing a connection with the server and enabling communication.
 
-In request e aproximativ la fel codul din laborator, numai ca am facut requesturile specifice cerintei:
-- In cazul de post o sa trimitem pe o linie url, pe a doua hostul, pe urmatoarele doua  cookieul si tokenul in cazul in care sunt valabile si payload-ul specific taskului.
-- In cazul de delete o sa avem doar ruta de acces, hostul, tokenul si cookieul.
-- In cazul de get avem la fel ca la Delete numai ca avem metoda GET.
+3. **Parson:**  
 
-In helper avem functiile pe care o sa le apelam in clientul meu numit program:
-- Avem 3 functii de extract in care ne scoate cookieul, tokenul si fieldurile cartiilor primite de la server. Efectiv ma folosesc de strstr pt a vedea unde se afla fiecare, iar in cazul fieldurilor tb sa inceapa cu { , [ si se termina cu }, ].
-- Functia create_json_user_object: folosindu-ne de biblioteca parson o sa ne geneream un obiect de tip JSON pt a putea prelucra usernameul si parola care urmeaza a fi citite pentru register si login. De ce parea citirea mai dubioasa? Ca nu cumva sa mi se suprapuna stringurile sau sa intampin probleme, de asemenea se da un clear la buffer de fiecare data cand e citit. Adica citirea e facuta astfel incat sa se opreasca la endline nu dupa spatiu, ma rog in cazul asta o sa afisam eroare daca intampinam spatiu si getchar e folosit pt a elimina orice caracter a ramas in bufferul de input.
+   This is a library for JSON in C, used when you need to send fields in requests.
 
-- Functia register_user: mai intai verifica daca nu cumva userul este invalid si atunci se afiseaza mesajul de eroare. In cazul in care totul este in regula o sa face un post_request asa cum e sugerat in API-ul temei. Dupa care o sa verificam codul intors. Daca codul de intoarcere este 201 inseamna ca a fost creat cu succes, daca nu inseamna ca deja exista.
+4. **Request:**  
 
-- Functia login: o sa trimita tot un post request numai ca o sa intoarca un cookie pentru a ne asigura ca suntem logati. Mi-am mai luat un flag pt a verifica in enter_library si alte comenzi daca avem voie sa facem requesturile corespunzatoare. Daca totul e ok flagul e setat pe 1 si cookieul este luat din server.
+   Similar to the lab code, but tailored for specific requirements:
 
-- Functia access_library: mai intai vedem daca suntem logati, daca nu avem de a face cu o eroare, daca suntem atunci vrem sa luam tokenul de la server ce ne asigura faptul ca avem acces in biblioteca si putem faca orice actiune care depinde de biblioteca. O sa setam si flagul de acces pe 1 pentru a ne asigura ca suntem privilegiati.
+   - For POST requests, it sends the URL on one line, the host on the second, the cookie and token (if available) on the next two lines, followed by the payload specific to the task.
 
-Obs: Nu are rost sa mai spun ce request trimit pentru ca sunt specificate in indrumarul temei.
+   - For DELETE requests, it includes only the access path, host, token, and cookie.
 
-- Functia get_books: In functia aceasta o sa vrem sa luam de la server id-urile si cartile inregistrate pana acum. 
+   - For GET requests, it includes the same as DELETE, but uses the GET method.
 
-- Functia get_book_details: E asemanatoare cu cea de mai sus numai ca o sa primim toate caracteristicile cartii specifice dupa un id. De asemenea verificam validitatea inputului ca sa nu avem surprize.
+5. **Helper:**  
 
-- Functia add_book_helper: Aici verificam daca inputurile sunt ok din punct de vedere al validitatii si daca sunt atunci le adaugam in obiectul nostru JSON pt a putea fi trimise catre server. Am explicat mai sus citirea stringurilor.
+   Contains functions that will be called in my client called `program`:
 
-- Functia add_book: Aici vedem daca putem trimite requestul sau nu si daca il trimitem verificam si codul de intoarcere.
+   - Three extraction functions to retrieve the cookie, token, and fields of the books received from the server. I use `strstr` to locate each, and for fields, it should start with `{` or `[` and end with `}` or `]`.
 
-- Functia delete_book_from_library: Actioneaza la fel ca functiile de mai sus numai ca dam un delete_request si verificam codul, la fel si pt functia de logout numai ca facem un get_request.
+   - The `create_json_user_object` function uses the Parson library to generate a JSON object for processing the username and password that will be read for registration and login. Reading is done carefully to avoid overlapping strings or other issues, with a clear buffer after each read. The reading stops at the newline, not after a space; an error is displayed if a space is encountered, and `getchar` is used to remove any remaining characters in the input buffer.
 
-Program.c
-In program.c facem conexiunea, setam variabilele descrise mai sus si apelam functiile povestite.
+   - The `register_user` function first checks if the user is invalid and displays an error message if so. If everything is okay, it performs a `post_request` as suggested in the API requirements. Then it checks the returned code; if the return code is 201, it means creation was successful; if not, the user already exists.
+
+   - The `login` function sends a `post_request` and receives a cookie to ensure the user is logged in. I have a flag to verify permissions for `enter_library` and other commands. If everything is fine, the flag is set to 1, and the cookie is obtained from the server.
+
+   - The `access_library` function first checks if the user is logged in; if not, it throws an error. If logged in, it retrieves the token from the server, ensuring access to the library and allowing any library-dependent actions. It also sets the access flag to 1 to confirm privileged access.
+
+   - The `get_books` function retrieves the IDs and books registered so far from the server.
+
+   - The `get_book_details` function is similar to the previous one but retrieves all characteristics of a specific book based on its ID. Input validity is also checked to avoid surprises.
+
+   - The `add_book_helper` function checks the validity of inputs and, if valid, adds them to our JSON object to be sent to the server. String reading is explained above.
+
+   - The `add_book` function checks if we can send the request; if we do, it also verifies the return code.
+
+   - The `delete_book_from_library` function operates similarly to the previous functions, sending a `delete_request` and checking the code, just like the `logout` function, which uses a `get_request`.
+
+6. **Program.c:**  
+
+   In `program.c`, we establish the connection, set the described variables, and call the explained functions.
